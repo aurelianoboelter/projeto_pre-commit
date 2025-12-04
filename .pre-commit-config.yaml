@@ -1,0 +1,60 @@
+repos:
+  - repo: local
+    hooks:
+      # ------------------------------------------------------------
+      # RUFF (lint + autofix)
+      # ------------------------------------------------------------
+      - id: ruff
+        name: ruff (autofix)
+        entry: ruff check
+        language: system
+        types: [python]
+        args: ["--fix", "--unsafe-fixes", "."]
+        pass_filenames: false
+
+      # ------------------------------------------------------------
+      # BLACK (formatador)
+      # ------------------------------------------------------------
+      - id: black
+        name: black
+        entry: black
+        language: system
+        types: [python]
+        args: ["--config=pyproject.toml", "."]
+        pass_filenames: false
+
+      # ------------------------------------------------------------
+      # PYTEST (validação das DAGs Airflow)
+      # ------------------------------------------------------------
+      - id: pytest
+        name: pytest (Airflow DAG validation)
+        entry: pytest
+        language: system
+        types: [python]
+        args: ["-q", "tests/test_dags_import.py"]
+        pass_filenames: false
+
+      # ------------------------------------------------------------
+      # SCRIPT CUSTOMIZADO PARA VALIDAR dag_id
+      # ------------------------------------------------------------
+      - id: check-dag-id
+        name: "(Custom) dag_id existence"
+        entry: python .hooks/check_dag_id_existence.py
+        language: system
+        types: [python]
+        files: ^dags/.*\.py$
+        pass_filenames: false
+
+  # ------------------------------------------------------------
+  # HOOKS OFICIAIS DO PRE-COMMIT
+  # ------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      # - id: check-json
+        exclude: ^\.vscode/
